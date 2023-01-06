@@ -36,8 +36,6 @@ int main(int argc, char* argv[])
 
     framebuffer.resize(width * height);
 
-    std::fflush(stdout);
-
     for (unsigned int y = 0; y < height; y++) {
         for (unsigned int x = 0; x < width; x++) {
             framebuffer[y * width + x] = (float)(
