@@ -6,7 +6,7 @@
 #include <sstream>
 #include <cstring>
 
-#define USE_PNG
+// #define USE_PNG
 
 #ifdef USE_PNG
 #include "lodepng.h"
@@ -63,111 +63,30 @@ int main(int argc, char* argv[])
     }
 #endif // USE_PNG
 
-    // Save the framebuffer with different a different quantization
-
-    // Lossless - let JXL figures out the quantization
     for (size_t q = 8; q > 1; q--) {
-        std::stringstream ss;
-        ss << "lossless_quantization_jxl_" << q << "_float.jxl";
+        std::stringstream ss_lossless;
+        ss_lossless << "lossless_quantization_jxl_" << q << ".jxl";
 
-        compress_framebuffer_float(
+        compress_framebuffer(
             framebuffer,
-            ss.str().c_str(),
+            ss_lossless.str().c_str(),
             width, height,
             q, 0, // Quantization
             0,    // Compression
             1     // Downsampling
         );
-    }
 
-    for (size_t q = 8; q > 1; q--) {
-        std::stringstream ss;
-        ss << "lossless_quantization_jxl_" << q << "_uint8.jxl";
+        std::stringstream ss_lossy;
+        ss_lossy << "lossy_quantization_jxl_" << q << ".jxl";
 
-        compress_framebuffer_uint8(
+        compress_framebuffer(
             framebuffer,
-            ss.str().c_str(),
+            ss_lossy.str().c_str(),
             width, height,
-            q, 0, // Quantization
-            0,    // Compression
-            1     // Downsampling
+            q, 0,    // Quantization
+            1,       // Compression
+            1        // Downsampling
         );
-    }
-
-    // float quality = 1.f;
-
-    for (float quality = 0.1f; quality < 8.f; quality += 0.5f) {
-        // Lossy - let JXL figures out the quantization
-        for (size_t q = 8; q > 1; q--) {
-            std::stringstream ss;
-            ss << "lossy_quantization_jxl_" << q << "_float_" << quality << ".jxl";
-
-            compress_framebuffer_float(
-                framebuffer,
-                ss.str().c_str(),
-                width, height,
-                q, 0,    // Quantization
-                quality, // Compression
-                1        // Downsampling
-            );
-        }
-
-        for (size_t q = 8; q > 1; q--) {
-            std::stringstream ss;
-            ss << "lossy_quantization_jxl_" << q << "_uint8_" << quality << ".jxl";
-
-            compress_framebuffer_uint8(
-                framebuffer,
-                ss.str().c_str(),
-                width, height,
-                q, 0,    // Quantization
-                quality, // Compression
-                1        // Downsampling
-            );
-        }
-
-        // Lossy - Enforce a quantization step before
-        for (size_t q = 8; q > 1; q--) {
-            std::stringstream ss;
-            ss << "sw_lossy_quantization_jxl_" << q << "_float_" << quality << ".jxl";
-
-            std::vector<float> quantized_framebuffer;
-
-            quantize_dequantize_single_image(
-                framebuffer,
-                quantized_framebuffer,
-                q);
-
-            compress_framebuffer_float(
-                quantized_framebuffer,
-                ss.str().c_str(),
-                width, height,
-                q, 0,    // Quantization
-                quality, // Compression
-                1        // Downsampling
-            );
-        }
-
-        for (size_t q = 8; q > 1; q--) {
-            std::stringstream ss;
-            ss << "sw_lossy_quantization_jxl_" << q << "_uint8_" << quality << ".jxl";
-
-            std::vector<float> quantized_framebuffer;
-
-            quantize_dequantize_single_image(
-                framebuffer,
-                quantized_framebuffer,
-                q);
-
-            compress_framebuffer_uint8(
-                quantized_framebuffer,
-                ss.str().c_str(),
-                width, height,
-                q, 0,    // Quantization
-                quality, // Compression
-                1        // Downsampling
-            );
-        }
     }
 
     return 0;
